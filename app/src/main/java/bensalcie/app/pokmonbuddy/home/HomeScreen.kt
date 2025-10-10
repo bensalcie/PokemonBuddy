@@ -15,16 +15,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bensalcie.app.core.network.ApiResult
+import bensalcie.app.pokmonbuddy.util.NetworkMonitor
 import bensalcie.app.domain.model.Pokemon
 import bensalcie.app.pokmonbuddy.R
+import bensalcie.app.pokmonbuddy.components.NoInternetView
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.getKoin
+import org.koin.compose.koinInject
+import org.koin.core.context.GlobalContext.get
 
 @Composable
 fun HomeScreen(
@@ -34,44 +42,72 @@ fun HomeScreen(
     val uiState by viewModel.state.collectAsState()
     var query by remember { mutableStateOf("") }
 
+    val context = LocalContext.current.applicationContext
+    val networkMonitor: NetworkMonitor = getKoin().get() // Inject networkMonitor by koinInject<NetworkMonitor>()
+    val scope = rememberCoroutineScope()
     val backgroundColor = MaterialTheme.colorScheme.background
-    Scaffold(
-        containerColor = backgroundColor,
-        topBar = {
-            Text(
-                text = stringResource(id = R.string.app_name_title),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp, bottom = 14.dp),
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color =  MaterialTheme.colorScheme.onBackground,
-                    textAlign = TextAlign.Center
-                )
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 20.dp)
-        ) {
-            SearchBar(
-                query = query,
-                onQueryChange = {
-                    query = it
-                    //viewModel.onSearch(it)
-                }
-            )
-            Spacer(Modifier.height(16.dp))
 
-            when (uiState) {
-                ApiResult.Loading -> LoadingGrid()
-                is ApiResult.Error -> ErrorState((uiState as ApiResult.Error).throwable.message ?: "Error")
-                is ApiResult.Success -> {
-                    val data = (uiState as ApiResult.Success<List<Pokemon>>).data
-                    val filtered = data.filter { it.name.contains(query, ignoreCase = true) }
-                    PokemonGrid(pokemonList = filtered, onClick = onPokemonClick)
+    var isConnected by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        networkMonitor.observe(context).collect { status ->
+            isConnected = status
+        }
+    }
+
+    if (!isConnected) {
+        NoInternetView(onRetry = {
+            scope.launch {
+                isConnected = networkMonitor.isNetworkAvailable(context)
+            }
+        })
+    } else {
+
+
+        Scaffold(
+            containerColor = backgroundColor,
+            topBar = {
+                Text(
+                    text = stringResource(id = R.string.app_name_title),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp, bottom = 14.dp),
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Center
+                    )
+                )
+            }
+        ) { padding ->
+
+
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(horizontal = 20.dp)
+            ) {
+                SearchBar(
+                    query = query,
+                    onQueryChange = {
+                        query = it
+                    }
+                )
+                Spacer(Modifier.height(16.dp))
+
+                when (uiState) {
+                    ApiResult.Loading ->  Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                    is ApiResult.Error -> ErrorState(
+                        (uiState as ApiResult.Error).throwable.message ?: "Error"
+                    )
+
+                    is ApiResult.Success -> {
+                        val data = (uiState as ApiResult.Success<List<Pokemon>>).data
+                        val filtered = data.filter { it.name.contains(query, ignoreCase = true) }
+                        PokemonGrid(pokemonList = filtered, onClick = onPokemonClick)
+                    }
                 }
             }
         }
@@ -89,9 +125,10 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         placeholder = { Text("Search by Name or number") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         singleLine = true,
+        textStyle = TextStyle(color =MaterialTheme.colorScheme.onBackground ),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = Color.White,
-            focusedContainerColor = Color.White,
+            unfocusedContainerColor =Color.White.copy(alpha = 0.5f),
+            focusedContainerColor = Color.White.copy(alpha = 0.5f),
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent
         )
@@ -152,10 +189,11 @@ fun PokemonCard(pokemon: Pokemon, onClick: () -> Unit) {
                 text = pokemon.name.replaceFirstChar { it.uppercase() },
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color =  Color(0xFF1C1C1E)
+                color = Color(0xFF1C1C1E)
             )
             Text(
-                text = pokemon.imageUrl?.substringAfterLast("/")?.substringBefore(".png")?.padStart(3, '0') ?: "",
+                text = pokemon.imageUrl?.substringAfterLast("/")?.substringBefore(".png")
+                    ?.padStart(3, '0') ?: "",
                 fontSize = 14.sp,
                 color = Color(0xFF7A7A7A)
             )

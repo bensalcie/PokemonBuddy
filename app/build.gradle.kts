@@ -58,6 +58,8 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     // Compose
     implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.foundation)
+
     // Coroutines
 
     // Retrofit

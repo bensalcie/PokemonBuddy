@@ -35,6 +35,10 @@ android {
 }
 
 dependencies {
+    implementation(kotlin("stdlib"))
+    implementation(libs.logging.interceptor)
+    implementation(libs.converter.gson)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

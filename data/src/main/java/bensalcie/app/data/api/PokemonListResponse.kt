@@ -10,12 +10,29 @@ data class PokemonEntry(val name: String, val url: String)
 data class PokemonDetailsResponse(
     val name: String,
     val sprites: Sprites?,
-    val stats: List<StatEntry>?
+    val stats: List<StatEntry>?,
+    val moves: List<MoveEntry>?,
+    val species: SpeciesEntry?,
+    val types: List<TypeEntry>?,
+    val weight: Int,
+    val height: Int
+
 ) {
     data class Sprites(val front_default: String?)
     data class StatEntry(val base_stat: Int, val stat: StatName) {
         data class StatName(val name: String)
     }
+
+    data class MoveEntry(val move: MoveName) {
+        data class MoveName(val name: String)
+    }
+
+    data class SpeciesEntry(val name: String, val url: String)
+    data class TypeEntry(val slot: Int, val type: TypeName) {
+        // Represents the inner "type" object, which holds the type's name and URL
+        data class TypeName(val name: String, val url: String)
+    }
+
 }
 
 /**

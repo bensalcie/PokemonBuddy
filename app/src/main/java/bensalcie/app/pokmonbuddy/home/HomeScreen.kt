@@ -122,7 +122,7 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp)),
-        placeholder = { Text("Search by Name or number") },
+        placeholder = { Text("Search by Name") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         singleLine = true,
         textStyle = TextStyle(color =MaterialTheme.colorScheme.onBackground ),
@@ -164,7 +164,7 @@ fun PokemonCard(pokemon: Pokemon, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
+            .aspectRatio(1.5f)
             .clip(RoundedCornerShape(20.dp))
             .background(bg)
             .clickable { onClick() },
@@ -174,7 +174,7 @@ fun PokemonCard(pokemon: Pokemon, onClick: () -> Unit) {
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(5.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -182,8 +182,8 @@ fun PokemonCard(pokemon: Pokemon, onClick: () -> Unit) {
                 model = pokemon.imageUrl,
                 contentDescription = pokemon.name,
                 modifier = Modifier
-                    .size(80.dp)
-                    .padding(bottom = 8.dp)
+                    .size(60.dp)
+                    .padding(bottom = 3.dp)
             )
             Text(
                 text = pokemon.name.replaceFirstChar { it.uppercase() },

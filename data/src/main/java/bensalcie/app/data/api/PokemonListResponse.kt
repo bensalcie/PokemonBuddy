@@ -18,6 +18,11 @@ data class PokemonDetailsResponse(
     }
 }
 
+/**
+ * Retrofit service interface for the Pokemon API.
+ * This interface defines the HTTP methods to be used to interact with the Pokemon API.
+ * [getPokemonList] is used to retrieve a list of Pokemon entries, capped at 100
+ */
 interface PokeApiService {
     @GET("pokemon")
     suspend fun getPokemonList(@Query("limit") limit: Int = 100): PokemonListResponse

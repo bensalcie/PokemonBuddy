@@ -9,6 +9,7 @@ import bensalcie.app.domain.usecase.GetPokemonDetailsUseCase
 import bensalcie.app.domain.usecase.GetPokemonListUseCase
 import bensalcie.app.pokmonbuddy.details.DetailsViewModel
 import bensalcie.app.pokmonbuddy.home.HomeViewModel
+import bensalcie.app.pokmonbuddy.util.NetworkMonitor
 
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -27,7 +28,7 @@ class MainApplication : Application() {
             single<PokemonRepository> { PokemonRepositoryImpl(get()) }
             single { GetPokemonListUseCase(get()) }
             single { GetPokemonDetailsUseCase(get()) }
-
+            single { NetworkMonitor }
             viewModel { HomeViewModel(get()) }
             viewModel { (name: String) -> DetailsViewModel(get(), name) }
         }

@@ -136,9 +136,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
                     text = {
                         Text(
                             text = title,
-                            color = if (selectedTab == index) Color(0xFF1C1C1E) else Color(
-                                0xFF9A9A9A
-                            ),
+                            color = if (selectedTab == index) MaterialTheme.colorScheme.onBackground else Color.Gray,
                             fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
                             fontSize = 14.sp
                         )

@@ -57,7 +57,7 @@ object NetworkMonitor {
         return isNetworkAvailable(cm)
     }
 
-    private fun isNetworkAvailable(connectivityManager: ConnectivityManager): Boolean {
+    fun isNetworkAvailable(connectivityManager: ConnectivityManager): Boolean {
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)

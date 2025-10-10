@@ -34,8 +34,7 @@ fun HomeScreen(
     val uiState by viewModel.state.collectAsState()
     var query by remember { mutableStateOf("") }
 
-    val backgroundColor = Color(0xFFEFF4F4)
-
+    val backgroundColor = MaterialTheme.colorScheme.background
     Scaffold(
         containerColor = backgroundColor,
         topBar = {
@@ -46,7 +45,7 @@ fun HomeScreen(
                     .padding(top = 24.dp, bottom = 14.dp),
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1C1C1E),
+                    color =  MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center
                 )
             )
@@ -87,7 +86,7 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp)),
-        placeholder = { Text("Name or number") },
+        placeholder = { Text("Search by Name or number") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
@@ -153,7 +152,7 @@ fun PokemonCard(pokemon: Pokemon, onClick: () -> Unit) {
                 text = pokemon.name.replaceFirstChar { it.uppercase() },
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF1C1C1E)
+                color =  Color(0xFF1C1C1E)
             )
             Text(
                 text = pokemon.imageUrl?.substringAfterLast("/")?.substringBefore(".png")?.padStart(3, '0') ?: "",

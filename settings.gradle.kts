@@ -20,4 +20,9 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "PokémonBuddy"
-include(":app")
+/**
+ * Adds The app, data, domain layers
+ * Ease of reusability
+ */
+include(":app", ":data", ":domain", ":core")
+

@@ -6,8 +6,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import bensalcie.app.pokmonbuddy.details.DetailsScreen
 import bensalcie.app.pokmonbuddy.home.HomeScreen
+import com.bensalcie.pokedex.details.DetailsScreen
 
 @Composable
 fun AppNavHost(navController: NavHostController) {

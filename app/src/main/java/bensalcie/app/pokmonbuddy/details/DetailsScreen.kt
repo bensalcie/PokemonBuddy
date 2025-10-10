@@ -25,6 +25,7 @@ import coil.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 
 import org.koin.core.parameter.parametersOf
+import java.util.Locale
 
 @Composable
 fun DetailsScreen(name: String, onBack: () -> Unit) {
@@ -32,7 +33,7 @@ fun DetailsScreen(name: String, onBack: () -> Unit) {
     val uiState by vm.state.collectAsState()
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color =  MaterialTheme.colorScheme.background
+        color = MaterialTheme.colorScheme.background
 
     ) {
         when (uiState) {
@@ -55,7 +56,7 @@ fun DetailsScreen(name: String, onBack: () -> Unit) {
 @Composable
 private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Stats", "Forms", "Detail", "Types", "Weaknesses")
+    val tabs = listOf("Stats", "Moves", "Detail", "Types", "Dimensions")
 
     val scrollState = rememberScrollState()
 
@@ -89,20 +90,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
             Spacer(Modifier.weight(1f))
         }
 
-        Spacer(Modifier.height(4.dp))
-
-        Text(
-            text = "#${
-                details.imageUrl?.substringAfterLast('/')?.substringBefore(".png")
-                    ?.padStart(3, '0') ?: ""
-            }",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            fontSize = 14.sp,
-            color =  MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(10.dp))
 
         // Image box
         Box(
@@ -110,7 +98,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
                 .fillMaxWidth()
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(24.dp))
-                .background( MaterialTheme.colorScheme.onBackground),
+                .background(MaterialTheme.colorScheme.onBackground),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
@@ -125,7 +113,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
         // Scrollable Tabs
         ScrollableTabRow(
             selectedTabIndex = selectedTab,
-            contentColor =  MaterialTheme.colorScheme.onBackground,
+            contentColor = MaterialTheme.colorScheme.onBackground,
             edgePadding = 0.dp,
             divider = {}
         ) {
@@ -149,10 +137,10 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
 
         when (selectedTab) {
             0 -> StatsTab(details)
-            1 -> FormsTab(details)
+            1 -> MovesTab(details)
             2 -> DetailTab(details)
             3 -> TypesTab(details)
-            4 -> WeaknessTab()
+            4 -> MeasurementTab(details)
         }
 
         Spacer(Modifier.height(60.dp)) // bottom padding
@@ -164,7 +152,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
  */
 
 @Composable
-private fun FormsTab(details: PokemonDetails) {
+private fun MovesTab(details: PokemonDetails) {
     Column {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -175,7 +163,7 @@ private fun FormsTab(details: PokemonDetails) {
                     modifier = Modifier
                         .size(80.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background( MaterialTheme.colorScheme.onBackground),
+                        .background(MaterialTheme.colorScheme.onBackground),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
@@ -187,18 +175,15 @@ private fun FormsTab(details: PokemonDetails) {
             }
         }
         Spacer(Modifier.height(12.dp))
-        Text(
-            text = "Mega Evolution",
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        details.moves.forEachIndexed { index, move ->
+            Text(
+                text = "(${index + 1}) ${move.name.capitalize(Locale.ROOT)}\n",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
         Spacer(Modifier.height(6.dp))
-        Text(
-            text = "In order to support its flower, which has grown larger due to Mega Evolution, its back and legs have become stronger.",
-            color =  MaterialTheme.colorScheme.onBackground,
-            lineHeight = 18.sp
-        )
     }
 }
 
@@ -206,37 +191,47 @@ private fun FormsTab(details: PokemonDetails) {
 private fun DetailTab(details: PokemonDetails) {
     Column {
         Text(
-            text = "Name: ${details.name.replaceFirstChar { it.uppercase() }}",
+            text = " (1) Name: ${details.name.replaceFirstChar { it.uppercase() }}",
             fontWeight = FontWeight.Medium,
-            color =  MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(Modifier.height(6.dp))
-        Text(text = "More info will be added here.", color =  MaterialTheme.colorScheme.onBackground)
+        Text(
+            text = " (2) Species: ${details.speciesName.capitalize(Locale.ROOT)}",
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }
 
 @Composable
 private fun TypesTab(details: PokemonDetails) {
+
     Column {
-        Text("Types section coming soon", color =  MaterialTheme.colorScheme.onBackground)
+        details.types.forEachIndexed { index, type ->
+
+            Text(
+                " (${index + 1}) ${type.name.capitalize(Locale.ROOT)}",
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
     }
 }
 
 @Composable
 private fun StatsTab(details: PokemonDetails) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        details.stats.forEach {
+        details.stats.forEachIndexed { index, it ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    it.name.replaceFirstChar { c -> c.uppercase() },
-                    color =  MaterialTheme.colorScheme.onBackground
+                    " (${index + 1}) ${it.name.replaceFirstChar { c -> c.uppercase() }}",
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     "${it.value}",
-                    color =  MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -244,8 +239,11 @@ private fun StatsTab(details: PokemonDetails) {
 }
 
 @Composable
-private fun WeaknessTab() {
+private fun MeasurementTab(details: PokemonDetails) {
     Column {
-        Text("Weakness info will be displayed here.", color =  MaterialTheme.colorScheme.onBackground)
+        Text(
+            " (1) Weight: ${details.weight} HG\n (2) Height: ${details.height} DM",
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }

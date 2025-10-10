@@ -3,9 +3,11 @@ package bensalcie.app.data.repository
 import bensalcie.app.core.network.ApiResult
 import bensalcie.app.core.util.Constants.IMAGE_BASE_URL
 import bensalcie.app.data.api.PokeApiService
+import bensalcie.app.domain.model.Move
 import bensalcie.app.domain.model.Pokemon
 import bensalcie.app.domain.model.PokemonDetails
 import bensalcie.app.domain.model.Stat
+import bensalcie.app.domain.model.Type
 import bensalcie.app.domain.repository.PokemonRepository
 
 
@@ -37,7 +39,26 @@ class PokemonRepositoryImpl(private val api: PokeApiService) : PokemonRepository
             val stats = details.stats?.map {
                 Stat(it.stat.name, it.base_stat)
             } ?: emptyList()
-            ApiResult.Success(PokemonDetails(details.name, details.sprites?.front_default, stats))
+            val moves = details.moves?.map {
+                Move(it.move.name)
+            } ?: emptyList()
+
+            val types = details.types?.map {
+                Type(it.type.name)
+            } ?: emptyList()
+
+            ApiResult.Success(
+                PokemonDetails(
+                    details.name,
+                    details.sprites?.front_default,
+                    stats,
+                    moves,
+                    speciesName = details.species?.name ?: "",
+                    types, details.weight,
+                    details.height
+                ),
+
+                )
         } catch (e: Exception) {
             ApiResult.Error(e)
         }

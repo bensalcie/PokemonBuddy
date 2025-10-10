@@ -6,12 +6,15 @@
 # Architecture: MVVM + Clean
 # Dependency Injection: Koin
 # Modules:
- :app – UI and DI setup
+ ```
+:app – UI and DI setup
  :data – API, repository implementations
  :domain – use cases, models
  :core – shared utilities (network, error handling, constants)
+```
 
-  ```core/
+```
+core/
     ├── network/
     │   ├── ApiResult.kt
     │   └── NetworkModule.kt

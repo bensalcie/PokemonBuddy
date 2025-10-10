@@ -1,6 +1,7 @@
 package bensalcie.app.data.repository
 
 import bensalcie.app.core.network.ApiResult
+import bensalcie.app.core.util.Constants.IMAGE_BASE_URL
 import bensalcie.app.data.api.PokeApiService
 import bensalcie.app.domain.model.Pokemon
 import bensalcie.app.domain.model.PokemonDetails
@@ -15,8 +16,12 @@ class PokemonRepositoryImpl(private val api: PokeApiService) : PokemonRepository
             ApiResult.Loading
             val result = api.getPokemonList().results.map { entry ->
                 val id = entry.url.trimEnd('/').split("/").last()
-                val image =
-                    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png"
+                val image = buildString {
+                    append(IMAGE_BASE_URL)
+                    append(id)
+                    append(".png")
+                }
+
                 Pokemon(entry.name, image)
             }
             ApiResult.Success(result)

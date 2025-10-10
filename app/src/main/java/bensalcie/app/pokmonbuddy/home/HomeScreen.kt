@@ -202,21 +202,6 @@ fun PokemonCard(pokemon: Pokemon, onClick: () -> Unit) {
 }
 
 @Composable
-fun LoadingGrid() {
-    LazyVerticalGrid(columns = GridCells.Fixed(2), content = {
-        items(6) {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color.LightGray.copy(alpha = 0.2f))
-            )
-        }
-    })
-}
-
-@Composable
 fun ErrorState(message: String) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(text = message)

@@ -2,6 +2,7 @@ package bensalcie.app.pokmonbuddy
 
 import android.app.Application
 import bensalcie.app.core.di.NetworkModule
+import bensalcie.app.core.util.Constants.BASEURL
 import bensalcie.app.data.api.PokeApiService
 import bensalcie.app.data.repository.PokemonRepositoryImpl
 import bensalcie.app.domain.repository.PokemonRepository
@@ -23,7 +24,7 @@ class MainApplication : Application() {
         super.onCreate()
 
         val appModule = module {
-            single<Retrofit> { NetworkModule.createRetrofit("https://pokeapi.co/api/v2/") }
+            single<Retrofit> { NetworkModule.createRetrofit(BASEURL) }
             single { get<Retrofit>().create(PokeApiService::class.java) }
             single<PokemonRepository> { PokemonRepositoryImpl(get()) }
             single { GetPokemonListUseCase(get()) }

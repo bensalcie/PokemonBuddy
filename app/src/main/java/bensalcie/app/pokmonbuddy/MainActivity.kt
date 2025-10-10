@@ -39,6 +39,7 @@ fun PokeMonBuddy(innerPadding: PaddingValues) {
             .fillMaxSize()
             .padding(innerPadding),
         color = MaterialTheme.colorScheme.background
+
     ) {
         val navController = rememberNavController()
         AppNavHost(navController = navController)

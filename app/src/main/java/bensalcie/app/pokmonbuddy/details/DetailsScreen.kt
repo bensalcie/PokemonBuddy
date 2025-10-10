@@ -1,4 +1,4 @@
-package com.bensalcie.pokedex.details
+package bensalcie.app.pokmonbuddy.details
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bensalcie.app.core.network.ApiResult
 import bensalcie.app.domain.model.PokemonDetails
-import bensalcie.app.pokmonbuddy.details.DetailsViewModel
 import coil.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 
@@ -31,12 +30,10 @@ import org.koin.core.parameter.parametersOf
 fun DetailsScreen(name: String, onBack: () -> Unit) {
     val vm: DetailsViewModel = koinViewModel(parameters = { parametersOf(name) })
     val uiState by vm.state.collectAsState()
-
-    val backgroundColor = Color(0xFFEFF4F4)
-
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = backgroundColor
+        color =  MaterialTheme.colorScheme.background
+
     ) {
         when (uiState) {
             ApiResult.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -57,7 +54,7 @@ fun DetailsScreen(name: String, onBack: () -> Unit) {
 
 @Composable
 private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Stats", "Forms", "Detail", "Types", "Weaknesses")
 
     val scrollState = rememberScrollState()
@@ -77,7 +74,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color(0xFF1C1C1E)
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
             Spacer(Modifier.weight(0.05f))
@@ -85,7 +82,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
                 text = details.name.replaceFirstChar { it.uppercase() },
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1C1C1E)
+                    color = MaterialTheme.colorScheme.onBackground
                 ),
                 textAlign = TextAlign.Start
             )
@@ -102,7 +99,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
-            color = Color(0xFF7A7A7A)
+            color =  MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(Modifier.height(12.dp))
@@ -113,7 +110,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
                 .fillMaxWidth()
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFFD6F0E6)),
+                .background( MaterialTheme.colorScheme.onBackground),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
@@ -128,7 +125,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
         // Scrollable Tabs
         ScrollableTabRow(
             selectedTabIndex = selectedTab,
-            contentColor = Color(0xFF1C1C1E),
+            contentColor =  MaterialTheme.colorScheme.onBackground,
             edgePadding = 0.dp,
             divider = {}
         ) {
@@ -180,7 +177,7 @@ private fun FormsTab(details: PokemonDetails) {
                     modifier = Modifier
                         .size(80.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFEFF4F4)),
+                        .background( MaterialTheme.colorScheme.onBackground),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
@@ -196,12 +193,12 @@ private fun FormsTab(details: PokemonDetails) {
             text = "Mega Evolution",
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
-            color = Color(0xFF1C1C1E)
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(Modifier.height(6.dp))
         Text(
             text = "In order to support its flower, which has grown larger due to Mega Evolution, its back and legs have become stronger.",
-            color = Color(0xFF7A7A7A),
+            color =  MaterialTheme.colorScheme.onBackground,
             lineHeight = 18.sp
         )
     }
@@ -213,17 +210,17 @@ private fun DetailTab(details: PokemonDetails) {
         Text(
             text = "Name: ${details.name.replaceFirstChar { it.uppercase() }}",
             fontWeight = FontWeight.Medium,
-            color = Color(0xFF1C1C1E)
+            color =  MaterialTheme.colorScheme.onBackground
         )
         Spacer(Modifier.height(6.dp))
-        Text(text = "More info will be added here.", color = Color(0xFF7A7A7A))
+        Text(text = "More info will be added here.", color =  MaterialTheme.colorScheme.onBackground)
     }
 }
 
 @Composable
 private fun TypesTab(details: PokemonDetails) {
     Column {
-        Text("Types section coming soon", color = Color(0xFF7A7A7A))
+        Text("Types section coming soon", color =  MaterialTheme.colorScheme.onBackground)
     }
 }
 
@@ -237,11 +234,11 @@ private fun StatsTab(details: PokemonDetails) {
             ) {
                 Text(
                     it.name.replaceFirstChar { c -> c.uppercase() },
-                    color = Color(0xFF1C1C1E)
+                    color =  MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     "${it.value}",
-                    color = Color(0xFF7A7A7A)
+                    color =  MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -251,6 +248,6 @@ private fun StatsTab(details: PokemonDetails) {
 @Composable
 private fun WeaknessTab() {
     Column {
-        Text("Weakness info will be displayed here.", color = Color(0xFF7A7A7A))
+        Text("Weakness info will be displayed here.", color =  MaterialTheme.colorScheme.onBackground)
     }
 }

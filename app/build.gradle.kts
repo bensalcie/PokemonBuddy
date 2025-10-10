@@ -59,6 +59,12 @@ dependencies {
     // Compose
     implementation(libs.androidx.compose.ui)
     // Coroutines
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)

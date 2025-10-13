@@ -1,9 +1,31 @@
-### 🚀 Project Setup
+# 🚀 Project Setup
 
 ## App Screenshots
 
-<img width="300" height="600" alt="image" src="https://github.com/user-attachments/assets/d206163e-b524-4fce-9139-e1c34c458363" />
-<img width="300" height="600" alt="image" src="https://github.com/user-attachments/assets/17a20e77-9abe-4003-a29e-731558792bb7" />
+
+# Pokémon Buddy
+
+## 📱 Screenshots
+
+<table>
+  <tr>
+    <td>
+      <img width="300" height="600" alt="Screenshot 1" src="https://github.com/bensalcie/PokemonBuddy/blob/main/screenshots/Screenshot%202025-10-13%20at%2013.52.27.png" />
+    </td>
+    <td>
+      <img width="300" height="600" alt="Screenshot 2" src="https://github.com/bensalcie/PokemonBuddy/blob/main/screenshots/Screenshot%202025-10-13%20at%2013.52.37.png" />
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img width="300" height="600" alt="Screenshot 3" src="https://github.com/bensalcie/PokemonBuddy/blob/main/screenshots/Screenshot%202025-10-13%20at%2013.53.31.png" />
+    </td>
+    <td>
+      <img width="300" height="600" alt="Screenshot 4" src="https://github.com/bensalcie/PokemonBuddy/blob/main/screenshots/Screenshot%202025-10-13%20at%2013.53.36.png" />
+    </td>
+  </tr>
+</table>
+
 
 # Minimum SDK: 24
 # Language: Kotlin

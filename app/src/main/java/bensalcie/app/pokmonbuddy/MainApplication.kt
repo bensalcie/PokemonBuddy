@@ -11,6 +11,7 @@ import bensalcie.app.domain.usecase.GetPokemonListUseCase
 import bensalcie.app.pokmonbuddy.details.DetailsViewModel
 import bensalcie.app.pokmonbuddy.home.HomeViewModel
 import bensalcie.app.pokmonbuddy.util.NetworkMonitor
+import kotlinx.coroutines.Dispatchers
 
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -26,12 +27,15 @@ class MainApplication : Application() {
         val appModule = module {
             single<Retrofit> { NetworkModule.createRetrofit(BASEURL) }
             single { get<Retrofit>().create(PokeApiService::class.java) }
-            single<PokemonRepository> { PokemonRepositoryImpl(get()) }
             single { GetPokemonListUseCase(get()) }
             single { GetPokemonDetailsUseCase(get()) }
             single { NetworkMonitor }
+            single { Dispatchers.IO }
             viewModel { HomeViewModel(get()) }
-            viewModel { (name: String) -> DetailsViewModel(get(), name) }
+            single<PokemonRepository> {
+                PokemonRepositoryImpl(api = get(), ioDispatcher = get())
+            }
+            viewModel { DetailsViewModel(get()) }
         }
 
         startKoin {

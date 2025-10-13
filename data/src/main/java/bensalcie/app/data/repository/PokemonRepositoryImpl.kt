@@ -3,64 +3,56 @@ package bensalcie.app.data.repository
 import bensalcie.app.core.network.ApiResult
 import bensalcie.app.core.util.Constants.IMAGE_BASE_URL
 import bensalcie.app.data.api.PokeApiService
+import bensalcie.app.data.utils.PokemonMappers
 import bensalcie.app.domain.model.Move
 import bensalcie.app.domain.model.Pokemon
 import bensalcie.app.domain.model.PokemonDetails
 import bensalcie.app.domain.model.Stat
 import bensalcie.app.domain.model.Type
 import bensalcie.app.domain.repository.PokemonRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 
 
-class PokemonRepositoryImpl(private val api: PokeApiService) : PokemonRepository {
+class PokemonRepositoryImpl(
+    private val api: PokeApiService,
+    private val ioDispatcher: CoroutineDispatcher
+) : PokemonRepository {
 
-    override suspend fun getPokemonList(): ApiResult<List<Pokemon>> {
-        return try {
-            ApiResult.Loading
-            val result = api.getPokemonList().results.map { entry ->
-                val id = entry.url.trimEnd('/').split("/").last()
-                val image = buildString {
-                    append(IMAGE_BASE_URL)
-                    append(id)
-                    append(".png")
-                }
+    override fun getPokemonList(
+        offset: Int,
+        limit: Int
+    ): Flow<ApiResult<List<Pokemon>>> = flow {
+        emit(ApiResult.Loading)
 
-                Pokemon(entry.name, image)
+        val result = withContext(ioDispatcher) {
+            try {
+                val response = api.getPokemonList(offset, limit)
+                val mapped = response.results.map { PokemonMappers.mapToDomain(it) }
+                ApiResult.Success(mapped)
+            } catch (e: Exception) {
+                ApiResult.Error(e)
             }
-            ApiResult.Success(result)
-        } catch (e: Exception) {
-            ApiResult.Error(e)
         }
-    }
 
-    override suspend fun getPokemonDetails(name: String): ApiResult<PokemonDetails> {
-        return try {
-            ApiResult.Loading
-            val details = api.getPokemonDetails(name)
-            val stats = details.stats?.map {
-                Stat(it.stat.name, it.base_stat)
-            } ?: emptyList()
-            val moves = details.moves?.map {
-                Move(it.move.name)
-            } ?: emptyList()
+        emit(result)
+    }.flowOn(ioDispatcher)
 
-            val types = details.types?.map {
-                Type(it.type.name)
-            } ?: emptyList()
+    override fun getPokemonDetails(name: String): Flow<ApiResult<PokemonDetails>> = flow {
+        emit(ApiResult.Loading)
 
-            ApiResult.Success(
-                PokemonDetails(
-                    details.name,
-                    details.sprites?.front_default,
-                    stats,
-                    moves,
-                    speciesName = details.species?.name ?: "",
-                    types, details.weight,
-                    details.height
-                ),
-
-                )
-        } catch (e: Exception) {
-            ApiResult.Error(e)
+        val result = withContext(ioDispatcher) {
+            try {
+                val response = api.getPokemonDetails(name)
+                ApiResult.Success(PokemonMappers.mapDetailsToDomain(response))
+            } catch (e: Exception) {
+                ApiResult.Error(e)
+            }
         }
-    }
+
+        emit(result)
+    }.flowOn(ioDispatcher)
 }

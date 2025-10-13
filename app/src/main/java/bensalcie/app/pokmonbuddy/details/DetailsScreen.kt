@@ -1,58 +1,60 @@
 package bensalcie.app.pokmonbuddy.details
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import bensalcie.app.core.network.ApiResult
 import bensalcie.app.domain.model.PokemonDetails
 import bensalcie.app.pokmonbuddy.details.ui.DetailsUiState
 import coil.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
-
-import org.koin.core.parameter.parametersOf
-import java.util.Locale
+import java.util.*
 
 @Composable
 fun DetailsScreen(name: String, onBack: () -> Unit) {
-    val vm: DetailsViewModel = koinViewModel(parameters = { parametersOf(name) })
-    val uiState by vm.uiState.collectAsStateWithLifecycle()
-    // Trigger fetching when screen is first composed
+    val viewModel: DetailsViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Fetch data on first composition
     LaunchedEffect(name) {
-        vm.loadDetails(name)
+        viewModel.loadDetails(name)
     }
 
     Surface(
-        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
-
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
         when (uiState) {
             is DetailsUiState.Loading -> Box(
-                Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }
 
             is DetailsUiState.Error -> Box(
-                Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                Text((uiState as DetailsUiState.Error).message)
+                Text(
+                    text = (uiState as DetailsUiState.Error).message,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
 
             is DetailsUiState.Success -> {
@@ -65,8 +67,14 @@ fun DetailsScreen(name: String, onBack: () -> Unit) {
 
 @Composable
 private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
-    var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Stats", "Moves", "Detail", "Types", "Dimensions")
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    val tabs = listOf(
+        stringResource(id = bensalcie.app.pokmonbuddy.R.string.tab_stats),
+        stringResource(id = bensalcie.app.pokmonbuddy.R.string.tab_moves),
+        stringResource(id = bensalcie.app.pokmonbuddy.R.string.tab_details),
+        stringResource(id = bensalcie.app.pokmonbuddy.R.string.tab_types),
+        stringResource(id = bensalcie.app.pokmonbuddy.R.string.tab_dimensions)
+    )
 
     val scrollState = rememberScrollState()
 
@@ -78,12 +86,13 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
     ) {
         // Top bar
         Row(
-            Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(bensalcie.app.pokmonbuddy.R.string.cd_back),
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
@@ -91,7 +100,8 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
             Text(
                 text = details.name.replaceFirstChar { it.uppercase() },
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 ),
                 textAlign = TextAlign.Start
             )
@@ -100,13 +110,13 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
 
         Spacer(Modifier.height(10.dp))
 
-        // Image box
+        // Pokémon image
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.onBackground),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
@@ -121,18 +131,26 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
         // Scrollable Tabs
         ScrollableTabRow(
             selectedTabIndex = selectedTab,
-            contentColor = MaterialTheme.colorScheme.onBackground,
+            contentColor = MaterialTheme.colorScheme.primary,
             edgePadding = 0.dp,
-            divider = {}) {
+            divider = {}
+        ) {
             tabs.forEachIndexed { index, title ->
-                Tab(selected = selectedTab == index, onClick = { selectedTab = index }, text = {
-                    Text(
-                        text = title,
-                        color = if (selectedTab == index) MaterialTheme.colorScheme.onBackground else Color.Gray,
-                        fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
-                        fontSize = 14.sp
-                    )
-                })
+                Tab(
+                    selected = selectedTab == index,
+                    onClick = { selectedTab = index },
+                    text = {
+                        Text(
+                            text = title,
+                            color = if (selectedTab == index)
+                                MaterialTheme.colorScheme.onBackground
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                            fontSize = 14.sp
+                        )
+                    }
+                )
             }
         }
 
@@ -146,61 +164,41 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
             4 -> MeasurementTab(details)
         }
 
-        Spacer(Modifier.height(60.dp)) // bottom padding
+        Spacer(Modifier.height(60.dp))
     }
 }
 
-/** Tabs Below the Image
- *
- */
+/** Tabs */
 
 @Composable
 private fun MovesTab(details: PokemonDetails) {
     Column {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState())
-        ) {
-            repeat(3) {
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.onBackground),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AsyncImage(
-                        model = details.imageUrl,
-                        contentDescription = null,
-                        modifier = Modifier.size(60.dp)
-                    )
-                }
-            }
-        }
         Spacer(Modifier.height(12.dp))
         details.moves.forEachIndexed { index, move ->
             Text(
-                text = "(${index + 1}) ${move.name.capitalize(Locale.ROOT)}\n",
+                text = "(${index + 1}) ${move.name.replaceFirstChar { it.uppercase() }}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
-        Spacer(Modifier.height(6.dp))
     }
 }
 
 @Composable
 private fun DetailTab(details: PokemonDetails) {
-    Column {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
-            text = " (1) Name: ${details.name.replaceFirstChar { it.uppercase() }}",
+            text = stringResource(
+                bensalcie.app.pokmonbuddy.R.string.label_name,
+                details.name.replaceFirstChar { it.uppercase() }),
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onBackground
         )
-        Spacer(Modifier.height(6.dp))
         Text(
-            text = " (2) Species: ${details.speciesName.capitalize(Locale.ROOT)}",
+            text = stringResource(
+                bensalcie.app.pokmonbuddy.R.string.label_species,
+                details.speciesName.replaceFirstChar { it.uppercase() }),
             color = MaterialTheme.colorScheme.onBackground
         )
     }
@@ -208,12 +206,13 @@ private fun DetailTab(details: PokemonDetails) {
 
 @Composable
 private fun TypesTab(details: PokemonDetails) {
-
-    Column {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         details.types.forEachIndexed { index, type ->
-
             Text(
-                " (${index + 1}) ${type.name.capitalize(Locale.ROOT)}",
+                text = stringResource(
+                    bensalcie.app.pokmonbuddy.R.string.label_type_item,
+                    index + 1,
+                    type.name.replaceFirstChar { it.uppercase() }),
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
@@ -223,16 +222,21 @@ private fun TypesTab(details: PokemonDetails) {
 @Composable
 private fun StatsTab(details: PokemonDetails) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        details.stats.forEachIndexed { index, it ->
+        details.stats.forEachIndexed { index, stat ->
             Row(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    " (${index + 1}) ${it.name.replaceFirstChar { c -> c.uppercase() }}",
+                    text = stringResource(
+                        bensalcie.app.pokmonbuddy.R.string.label_stat_item,
+                        index + 1,
+                        stat.name.replaceFirstChar { it.uppercase() }),
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    "${it.value}", color = MaterialTheme.colorScheme.onBackground
+                    text = "${stat.value}",
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -243,7 +247,11 @@ private fun StatsTab(details: PokemonDetails) {
 private fun MeasurementTab(details: PokemonDetails) {
     Column {
         Text(
-            " (1) Weight: ${details.weight} HG\n (2) Height: ${details.height} DM",
+            text = stringResource(
+                bensalcie.app.pokmonbuddy.R.string.label_measurements,
+                details.weight,
+                details.height
+            ),
             color = MaterialTheme.colorScheme.onBackground
         )
     }

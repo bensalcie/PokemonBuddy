@@ -2,27 +2,27 @@ package bensalcie.app.pokmonbuddy.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
-import bensalcie.app.pokmonbuddy.home.HomeScreen
 import bensalcie.app.pokmonbuddy.details.DetailsScreen
+import bensalcie.app.pokmonbuddy.home.HomeScreen
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
-    NavHost(navController, startDestination = "home") {
-        composable("home") {
+    NavHost(
+        navController = navController,
+        startDestination = NavigationConstants.ROUTE_HOME
+    ) {
+        composable(NavRoutes.Home.route) {
             HomeScreen(onPokemonClick = { name ->
-                navController.navigate("details/$name")
+                navController.navigate(NavRoutes.Details.createRoute(name))
             })
         }
-        composable(
-            "details/{name}",
-            arguments = listOf(navArgument("name") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val name = backStackEntry.arguments?.getString("name") ?: ""
-            DetailsScreen(name, onBack = { navController.popBackStack() })
+
+        composable(NavRoutes.Details.route) { backStackEntry ->
+            val name =
+                backStackEntry.arguments?.getString(NavigationConstants.ARG_POKEMON_NAME).orEmpty()
+            DetailsScreen(name = name, onBack = { navController.popBackStack() })
         }
     }
 }

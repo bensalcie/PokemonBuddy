@@ -1,16 +1,18 @@
 package bensalcie.app.data.api
 
+import bensalcie.app.core.util.Constants.BASEURL
+import bensalcie.app.core.util.Constants.IMAGE_BASE_URL
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 class PokemonDetailsResponseTest {
     private val pokemonDetailsResponse = PokemonDetailsResponse(
         name = "Pikachu",
-        sprites = PokemonDetailsResponse.Sprites(front_default = "https://example.com/pikachu.png"),
+        sprites = PokemonDetailsResponse.Sprites(front_default = "${IMAGE_BASE_URL}pikachu.png"),
         stats = listOf(),
         moves = listOf(),
         species = PokemonDetailsResponse.SpeciesEntry(
-            url = "https://example.com/species/pikachu",
+            url = "${BASEURL}/pikachu",
             name = "Pikachu"
         ),
         types = listOf(),
@@ -42,7 +44,7 @@ class PokemonDetailsResponseTest {
     @Test
     fun `getSprites   with non null value`() {
 
-        assertEquals("https://example.com/pikachu.png", pokemonDetailsResponse.sprites?.front_default)
+        assertEquals("${IMAGE_BASE_URL}/pikachu.png", pokemonDetailsResponse.sprites?.front_default)
     }
 
 }

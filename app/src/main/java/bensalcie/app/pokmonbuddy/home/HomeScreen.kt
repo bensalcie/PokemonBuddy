@@ -22,11 +22,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bensalcie.app.core.network.ApiResult
 import bensalcie.app.pokmonbuddy.util.NetworkMonitor
 import bensalcie.app.domain.model.Pokemon
 import bensalcie.app.pokmonbuddy.R
 import bensalcie.app.pokmonbuddy.components.NoInternetView
+import bensalcie.app.pokmonbuddy.home.ui.HomeUiState
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -39,11 +41,12 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
     onPokemonClick: (String) -> Unit
 ) {
-    val uiState by viewModel.state.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var query by remember { mutableStateOf("") }
 
     val context = LocalContext.current.applicationContext
-    val networkMonitor: NetworkMonitor = getKoin().get() // Inject networkMonitor by koinInject<NetworkMonitor>()
+    val networkMonitor: NetworkMonitor =
+        getKoin().get() // Inject networkMonitor by koinInject<NetworkMonitor>()
     val scope = rememberCoroutineScope()
     val backgroundColor = MaterialTheme.colorScheme.background
 
@@ -96,17 +99,25 @@ fun HomeScreen(
                 Spacer(Modifier.height(16.dp))
 
                 when (uiState) {
-                    ApiResult.Loading ->  Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    is HomeUiState.Loading -> Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CircularProgressIndicator()
                     }
-                    is ApiResult.Error -> ErrorState(
-                        (uiState as ApiResult.Error).throwable.message ?: "Error"
+
+                    is HomeUiState.Error -> ErrorState(
+                        (uiState as HomeUiState.Error).message
                     )
 
-                    is ApiResult.Success -> {
-                        val data = (uiState as ApiResult.Success<List<Pokemon>>).data
+                    is HomeUiState.Success -> {
+                        val data = (uiState as HomeUiState.Success).pokeMons
                         val filtered = data.filter { it.name.contains(query, ignoreCase = true) }
                         PokemonGrid(pokemonList = filtered, onClick = onPokemonClick)
+                    }
+
+                    HomeUiState.Idle -> {
+                        LaunchedEffect(Unit) { viewModel.loadPokeMons() }
                     }
                 }
             }
@@ -125,9 +136,9 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         placeholder = { Text("Search by Name") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         singleLine = true,
-        textStyle = TextStyle(color =MaterialTheme.colorScheme.onBackground ),
+        textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor =Color.White.copy(alpha = 0.5f),
+            unfocusedContainerColor = Color.White.copy(alpha = 0.5f),
             focusedContainerColor = Color.White.copy(alpha = 0.5f),
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent

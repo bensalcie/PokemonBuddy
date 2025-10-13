@@ -25,7 +25,7 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         onValueChange = onQueryChange,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(RoundedCornerShape(5.dp)),
         placeholder = { Text(stringResource(R.string.search_by_name)) },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         singleLine = true,

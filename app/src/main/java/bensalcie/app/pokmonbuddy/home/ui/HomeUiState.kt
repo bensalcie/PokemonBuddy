@@ -9,6 +9,5 @@ sealed interface HomeUiState {
         val pokeMons: List<Pokemon>,
         val isLoadingMore: Boolean = false
     ) : HomeUiState
-
     data class Error(val message: String) : HomeUiState
 }

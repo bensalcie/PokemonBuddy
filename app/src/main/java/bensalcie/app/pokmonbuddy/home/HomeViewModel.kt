@@ -1,5 +1,6 @@
 package bensalcie.app.pokmonbuddy.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bensalcie.app.core.network.ApiResult
@@ -20,7 +21,6 @@ class HomeViewModel(
 
     private var offset = 0
     private val limit = 100
-
     private var isLoadingMore = false
 
     init {
@@ -28,16 +28,21 @@ class HomeViewModel(
     }
 
     fun loadPokemons(isLoadMore: Boolean = false) {
-        // prevent duplicate loads
         if (isLoadMore && isLoadingMore) return
 
         viewModelScope.launch {
             if (isLoadMore) {
+                Log.d("HomeVM", "🔄 Load more triggered!")
                 isLoadingMore = true
+
+                // ✅  reflect "loading more" state
                 _uiState.update {
-                    if (it is HomeUiState.Success)
+                    if (it is HomeUiState.Success) {
+                        Log.d("HomeVM", "🟢 Updating UI with isLoadingMore = true")
                         it.copy(isLoadingMore = true)
-                    else it
+                    } else {
+                        it
+                    }
                 }
             } else {
                 _uiState.value = HomeUiState.Loading
@@ -46,6 +51,7 @@ class HomeViewModel(
             repository.getPokemonList(offset, limit).collectLatest { result ->
                 when (result) {
                     is ApiResult.Success -> {
+
                         _uiState.update { current ->
                             val newList = if (isLoadMore && current is HomeUiState.Success) {
                                 current.pokeMons + result.data
@@ -57,14 +63,13 @@ class HomeViewModel(
                     }
 
                     is ApiResult.Error -> {
-                        _uiState.value =
-                            HomeUiState.Error(result.throwable.message ?: "Failed to load Pokémon")
+                        _uiState.value = HomeUiState.Error(
+                            result.throwable.message ?: "Failed to load Pokémon"
+                        )
                         isLoadingMore = false
                     }
 
                     is ApiResult.Loading -> {
-                        // optional: keep the UI aware if needed
-                        if (!isLoadMore) _uiState.value = HomeUiState.Loading
                     }
                 }
             }

@@ -19,8 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bensalcie.app.core.network.ApiResult
 import bensalcie.app.domain.model.PokemonDetails
+import bensalcie.app.pokmonbuddy.details.ui.DetailsUiState
 import coil.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 
@@ -30,23 +32,27 @@ import java.util.Locale
 @Composable
 fun DetailsScreen(name: String, onBack: () -> Unit) {
     val vm: DetailsViewModel = koinViewModel(parameters = { parametersOf(name) })
-    val uiState by vm.state.collectAsState()
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
+
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
 
     ) {
         when (uiState) {
-            ApiResult.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            is DetailsUiState.Loading -> Box(
+                Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
 
-            is ApiResult.Error -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text((uiState as ApiResult.Error).throwable.message ?: "Error")
+            is DetailsUiState.Error -> Box(
+                Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+            ) {
+                Text((uiState as DetailsUiState.Error).message)
             }
 
-            is ApiResult.Success -> {
-                val details = (uiState as ApiResult.Success<PokemonDetails>).data
+            is DetailsUiState.Success -> {
+                val details = (uiState as DetailsUiState.Success).details
                 DetailsContent(details, onBack)
             }
         }
@@ -68,8 +74,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
     ) {
         // Top bar
         Row(
-            Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
                 Icon(
@@ -82,8 +87,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
             Text(
                 text = details.name.replaceFirstChar { it.uppercase() },
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground
                 ),
                 textAlign = TextAlign.Start
             )
@@ -115,21 +119,16 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
             selectedTabIndex = selectedTab,
             contentColor = MaterialTheme.colorScheme.onBackground,
             edgePadding = 0.dp,
-            divider = {}
-        ) {
+            divider = {}) {
             tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTab == index,
-                    onClick = { selectedTab = index },
-                    text = {
-                        Text(
-                            text = title,
-                            color = if (selectedTab == index) MaterialTheme.colorScheme.onBackground else Color.Gray,
-                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
-                            fontSize = 14.sp
-                        )
-                    }
-                )
+                Tab(selected = selectedTab == index, onClick = { selectedTab = index }, text = {
+                    Text(
+                        text = title,
+                        color = if (selectedTab == index) MaterialTheme.colorScheme.onBackground else Color.Gray,
+                        fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                        fontSize = 14.sp
+                    )
+                })
             }
         }
 
@@ -222,16 +221,14 @@ private fun StatsTab(details: PokemonDetails) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         details.stats.forEachIndexed { index, it ->
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     " (${index + 1}) ${it.name.replaceFirstChar { c -> c.uppercase() }}",
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    "${it.value}",
-                    color = MaterialTheme.colorScheme.onBackground
+                    "${it.value}", color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }

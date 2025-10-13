@@ -21,41 +21,59 @@ class HomeViewModel(
     private var offset = 0
     private val limit = 100
 
+    private var isLoadingMore = false
+
     init {
         loadPokemons()
     }
 
-    private var isLoadingMore = false
-
     fun loadPokemons(isLoadMore: Boolean = false) {
+        // prevent duplicate loads
         if (isLoadMore && isLoadingMore) return
-        isLoadingMore = true
 
         viewModelScope.launch {
+            if (isLoadMore) {
+                isLoadingMore = true
+                _uiState.update {
+                    if (it is HomeUiState.Success)
+                        it.copy(isLoadingMore = true)
+                    else it
+                }
+            } else {
+                _uiState.value = HomeUiState.Loading
+            }
+
             repository.getPokemonList(offset, limit).collectLatest { result ->
                 when (result) {
-                    is ApiResult.Loading -> if (!isLoadMore) _uiState.update { HomeUiState.Loading }
                     is ApiResult.Success -> {
-                        _uiState.update {
-                            val newList = if (isLoadMore && it is HomeUiState.Success) {
-                                it.pokeMons + result.data
+                        _uiState.update { current ->
+                            val newList = if (isLoadMore && current is HomeUiState.Success) {
+                                current.pokeMons + result.data
                             } else result.data
-                            HomeUiState.Success(newList)
+                            HomeUiState.Success(newList, isLoadingMore = false)
                         }
                         offset += limit
+                        isLoadingMore = false
                     }
-                    is ApiResult.Error -> _uiState.update {
-                        HomeUiState.Error(result.throwable.message ?: "Failed to load Pokémon")
+
+                    is ApiResult.Error -> {
+                        _uiState.value =
+                            HomeUiState.Error(result.throwable.message ?: "Failed to load Pokémon")
+                        isLoadingMore = false
+                    }
+
+                    is ApiResult.Loading -> {
+                        // optional: keep the UI aware if needed
+                        if (!isLoadMore) _uiState.value = HomeUiState.Loading
                     }
                 }
             }
-            isLoadingMore = false
         }
     }
-
 
     fun reloadData() {
         offset = 0
         loadPokemons()
     }
 }
+

@@ -4,5 +4,5 @@ import bensalcie.app.domain.repository.PokemonRepository
 
 
 class GetPokemonDetailsUseCase(private val repo: PokemonRepository) {
-    suspend operator fun invoke(name: String) = repo.getPokemonDetails(name)
+    operator fun invoke(name: String) = repo.getPokemonDetails(name)
 }

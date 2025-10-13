@@ -1,5 +1,10 @@
 ### 🚀 Project Setup
 
+## App Screenshots
+
+<img width="300" height="600" alt="image" src="https://github.com/user-attachments/assets/d206163e-b524-4fce-9139-e1c34c458363" />
+<img width="300" height="600" alt="image" src="https://github.com/user-attachments/assets/17a20e77-9abe-4003-a29e-731558792bb7" />
+
 # Minimum SDK: 24
 # Language: Kotlin
 # UI Framework: Jetpack Compose

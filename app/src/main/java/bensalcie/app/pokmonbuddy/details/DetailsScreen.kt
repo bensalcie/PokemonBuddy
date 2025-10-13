@@ -173,30 +173,7 @@ private fun DetailsContent(details: PokemonDetails, onBack: () -> Unit) {
 @Composable
 private fun MovesTab(details: PokemonDetails) {
     Column {
-        // Show dynamic images instead of repeating 3 hardcoded ones
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.horizontalScroll(rememberScrollState())
-        ) {
-            details.moves.take(3).forEach { move ->
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AsyncImage(
-                        model = details.imageUrl,
-                        contentDescription = move.name,
-                        modifier = Modifier.size(60.dp)
-                    )
-                }
-            }
-        }
-
         Spacer(Modifier.height(12.dp))
-
         details.moves.forEachIndexed { index, move ->
             Text(
                 text = "(${index + 1}) ${move.name.replaceFirstChar { it.uppercase() }}",

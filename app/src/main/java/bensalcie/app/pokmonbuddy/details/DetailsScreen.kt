@@ -33,6 +33,10 @@ import java.util.Locale
 fun DetailsScreen(name: String, onBack: () -> Unit) {
     val vm: DetailsViewModel = koinViewModel(parameters = { parametersOf(name) })
     val uiState by vm.uiState.collectAsStateWithLifecycle()
+    // Trigger fetching when screen is first composed
+    LaunchedEffect(name) {
+        vm.loadDetails(name)
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background

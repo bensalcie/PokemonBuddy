@@ -1,16 +1,29 @@
 package bensalcie.app.pokmonbuddy.home
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,107 +34,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import bensalcie.app.core.network.ApiResult
-import bensalcie.app.pokmonbuddy.util.NetworkMonitor
-import bensalcie.app.domain.model.Pokemon
 import bensalcie.app.pokmonbuddy.R
 import bensalcie.app.pokmonbuddy.components.NoInternetView
 import bensalcie.app.pokmonbuddy.home.ui.HomeUiState
-import coil.compose.AsyncImage
+import bensalcie.app.pokmonbuddy.home.ui.PokemonGrid
+import bensalcie.app.pokmonbuddy.util.NetworkMonitor
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.getKoin
-import org.koin.compose.koinInject
-import org.koin.core.context.GlobalContext.get
 
 @Composable
-fun HomeScreen(
-    viewModel: HomeViewModel = koinViewModel(),
-    onPokemonClick: (String) -> Unit
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var query by remember { mutableStateOf("") }
-
-    val context = LocalContext.current.applicationContext
-    val networkMonitor: NetworkMonitor =
-        getKoin().get() // Inject networkMonitor by koinInject<NetworkMonitor>()
-    val scope = rememberCoroutineScope()
-    val backgroundColor = MaterialTheme.colorScheme.background
-
-    var isConnected by remember { mutableStateOf(true) }
-
-    LaunchedEffect(Unit) {
-        networkMonitor.observe(context).collect { status ->
-            isConnected = status
-        }
-    }
-
-    if (!isConnected) {
-        NoInternetView(onRetry = {
-            scope.launch {
-                isConnected = networkMonitor.isNetworkAvailable(context)
-            }
-        })
-    } else {
-
-
-        Scaffold(
-            containerColor = backgroundColor,
-            topBar = {
-                Text(
-                    text = stringResource(id = R.string.app_name_title),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp, bottom = 14.dp),
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        textAlign = TextAlign.Center
-                    )
-                )
-            }
-        ) { padding ->
-
-
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(horizontal = 20.dp)
-            ) {
-                SearchBar(
-                    query = query,
-                    onQueryChange = {
-                        query = it
-                    }
-                )
-                Spacer(Modifier.height(16.dp))
-
-                when (uiState) {
-                    is HomeUiState.Loading -> Box(
-                        Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-
-                    is HomeUiState.Error -> ErrorState(
-                        (uiState as HomeUiState.Error).message
-                    )
-
-                    is HomeUiState.Success -> {
-                        val data = (uiState as HomeUiState.Success).pokeMons
-                        val filtered = data.filter { it.name.contains(query, ignoreCase = true) }
-                        PokemonGrid(pokemonList = filtered, onClick = onPokemonClick)
-                    }
-
-                    HomeUiState.Idle -> {
-                        LaunchedEffect(Unit) { viewModel.loadPokeMons() }
-                    }
-                }
-            }
-        }
+fun ErrorState(message: String) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = message)
     }
 }
 
@@ -147,74 +73,84 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
 }
 
 @Composable
-fun PokemonGrid(pokemonList: List<Pokemon>, onClick: (String) -> Unit) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(bottom = 80.dp)
-    ) {
-        items(pokemonList) { pokemon ->
-            PokemonCard(pokemon = pokemon, onClick = { onClick(pokemon.name) })
+fun HomeScreen(
+    viewModel: HomeViewModel = koinViewModel(),
+    onPokemonClick: (String) -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var query by remember { mutableStateOf("") }
+
+    val context = LocalContext.current.applicationContext
+    val networkMonitor: NetworkMonitor = getKoin().get()
+    val scope = rememberCoroutineScope()
+    val backgroundColor = MaterialTheme.colorScheme.background
+
+    var isConnected by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        networkMonitor.observe(context).collect { status ->
+            isConnected = status
         }
     }
-}
 
-@Composable
-fun PokemonCard(pokemon: Pokemon, onClick: () -> Unit) {
-    val pastelColors = listOf(
-        Color(0xFFD6F0E6),
-        Color(0xFFDDE6F5),
-        Color(0xFFFCE8D7),
-        Color(0xFFF5D6D6)
-    )
-    val bg = remember(pokemon.name.hashCode()) {
-        pastelColors.random()
-    }
+    if (!isConnected) {
+        NoInternetView(onRetry = {
+            scope.launch {
+                isConnected = networkMonitor.isNetworkAvailable(context)
+                if (isConnected) viewModel.reloadData()
+            }
+        })
+    } else {
+        Scaffold(
+            containerColor = backgroundColor,
+            topBar = {
+                Text(
+                    text = stringResource(id = R.string.app_name_title),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp, bottom = 14.dp),
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = TextAlign.Center
+                    )
+                )
+            }
+        ) { padding ->
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1.5f)
-            .clip(RoundedCornerShape(20.dp))
-            .background(bg)
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = bg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(5.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            AsyncImage(
-                model = pokemon.imageUrl,
-                contentDescription = pokemon.name,
+            Column(
                 modifier = Modifier
-                    .size(60.dp)
-                    .padding(bottom = 3.dp)
-            )
-            Text(
-                text = pokemon.name.replaceFirstChar { it.uppercase() },
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF1C1C1E)
-            )
-            Text(
-                text = pokemon.imageUrl?.substringAfterLast("/")?.substringBefore(".png")
-                    ?.padStart(3, '0') ?: "",
-                fontSize = 14.sp,
-                color = Color(0xFF7A7A7A)
-            )
-        }
-    }
-}
+                    .padding(padding)
+                    .padding(horizontal = 20.dp)
+            ) {
+                SearchBar(query = query, onQueryChange = { query = it })
+                Spacer(Modifier.height(16.dp))
 
-@Composable
-fun ErrorState(message: String) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = message)
+                when (uiState) {
+                    is HomeUiState.Loading -> Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+
+                    is HomeUiState.Error -> ErrorState((uiState as HomeUiState.Error).message)
+
+                    is HomeUiState.Success -> {
+                        val data = (uiState as HomeUiState.Success).pokeMons
+                        val filtered = data.filter { it.name.contains(query, ignoreCase = true) }
+                        PokemonGrid(
+                            pokemonList = filtered,
+                            onClick = onPokemonClick,
+                            onLoadMore = { viewModel.loadPokemons(isLoadMore = true) }
+                        )
+                    }
+
+                    HomeUiState.Idle -> {
+                        LaunchedEffect(Unit) { viewModel.loadPokemons() }
+                    }
+                }
+            }
+        }
     }
 }

@@ -44,7 +44,6 @@ dependencies {
     implementation(libs.material)
 
     testImplementation(libs.mockk)
-    testImplementation(libs.koin.test)
     testImplementation(libs.kotlinx.coroutines.test)
 
     testImplementation(libs.junit)

@@ -73,7 +73,12 @@ dependencies {
     implementation(libs.androidx.compose.material3)
 
     testImplementation(libs.mockk)
-    testImplementation(libs.koin.test)
+    //Koin test
+    implementation(platform(libs.koin.bom))
+
+    // Koin dependencies (no need to specify versions)
+    testImplementation(libs.insert.koin.koin.test)
+    testImplementation(libs.koin.test.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
 
     testImplementation(libs.junit)

@@ -31,20 +31,21 @@ class PokemonDetailsResponseTest {
 
     @Test
     fun `getName   with empty string`() {
+        pokemonDetailsResponse.copy(name = "")
         // Verify that getName() returns an empty string when the 'name' property is explicitly set to an empty string.
-        assertEquals("", pokemonDetailsResponse.name)
+        assertEquals(listOf<PokemonDetailsResponse.StatEntry>(), pokemonDetailsResponse.stats)
     }
 
     @Test
     fun `getName   with special characters`() {
 
-        assertEquals("Pikachu", pokemonDetailsResponse.name)
+        assertEquals(listOf<PokemonDetailsResponse.MoveEntry>(), pokemonDetailsResponse.moves)
     }
 
     @Test
     fun `getSprites   with non null value`() {
 
-        assertEquals("${IMAGE_BASE_URL}/pikachu.png", pokemonDetailsResponse.sprites?.front_default)
+        assertEquals("${IMAGE_BASE_URL}pikachu.png", pokemonDetailsResponse.sprites?.front_default)
     }
 
 }

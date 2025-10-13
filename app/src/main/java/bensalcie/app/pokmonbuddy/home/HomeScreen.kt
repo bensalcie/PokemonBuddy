@@ -21,7 +21,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -96,21 +95,24 @@ fun HomeScreen(
                     is HomeUiState.Loading ->
 
                         Box(
-                        Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color =MaterialTheme.colorScheme.onBackground)
-                    }
+                            Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
+                        }
 
                     is HomeUiState.Error -> ErrorState((uiState as HomeUiState.Error).message)
 
                     is HomeUiState.Success -> {
-                        val data = (uiState as HomeUiState.Success).pokeMons
+                        val successState = uiState as HomeUiState.Success
+                        val data = successState.pokeMons
                         val filtered = data.filter { it.name.contains(query, ignoreCase = true) }
+
                         PokemonGrid(
                             pokemonList = filtered,
                             onClick = onPokemonClick,
-                            onLoadMore = { viewModel.loadPokemons(isLoadMore = true) }
+                            onLoadMore = { viewModel.loadPokemons(isLoadMore = true) },
+                            isLoadingMore = successState.isLoadingMore
                         )
                     }
 
